@@ -1,0 +1,19 @@
+B"H
+
+
+
+    1: Switch to use __API__ :
+        - http://developmentnow.com/2016/07/13/webpack-injecting-server-urls/
+
+
+    2: Get thunk test to work
+
+
+    3: Clean up package.json
+
+
+    4: Setup surge details like custom domain etc.
+        - https://surge.sh/help/getting-started-with-surge
+
+
+    5: Incorporate ideas from js-fp, including seamless-immuatble

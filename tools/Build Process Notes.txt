@@ -1,0 +1,83 @@
+B"H
+
+
+Our development process doesn't generate any actual physical files.
+Everything's being served by Webpack.
+It just reads the files in the source directory and serves the process files from memory.
+SEE srcServer.js
+
+
+For production, we need to write physical files to the file system so that a web server can serve them up.
+SEE distServer.js
+
+
+The source folder is obviously our source code and the dist folder is the production build.
+In other words, for distribution. So we'll write our final production build to the dist folder.
+
+Our goal for production is to bundle our entire application into 4 files:
+    1: a minified and bundled JavaScript file
+    2: a minified and bundled CSS file
+    3: an HTML file that references both of the above file
+    4: a source map file that's corresponding to the JS file and the CSS file since we're going to minify both of these.
+
+Our automated build process does the following:
+    - Lints
+    - Runs our tests
+    - Bundles all our JavaScript into a single minified file
+    - Generates source maps for both so that we can debug production issues
+    - Excludes dev-specific code like hot reloading
+    - Build React in production mode, so dev-specific features like PropType validation are disabled for optimal performance.
+    - Finally, we'll automatically open up the final production build in the browser so that we can see the results.
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+NOTES for build lines in package.json:
+
+  "scripts": {
+    "prestart": "babel-node tools/startMessage.js",
+    "start": "npm-run-all --parallel test:watch open:src lint:watch",
+    "open:src": "babel-node tools/srcServer.js",
+    "lint": "node_modules/.bin/esw webpack.config.* src tools",
+    "lint:watch": "npm run lint -- --watch",
+    "test": "mocha --reporter spec tools/testSetup.js src/**/*.test.js src/components/**/*.test.js",
+    "test:watch": "npm run test -- --watch",
+
+___________________________________________________________________________________________
+Get rid of the dist folder and then recreate it:
+
+    "clean-dist": "npm run remove-dist && mkdir dist",
+    "remove-dist": "node_modules/.bin/rimraf ./dist",
+___________________________________________________________________________________________
+
+
+    "build:html": "babel-node tools/buildHtml.js",
+
+
+___________________________________________________________________________________________
+By convention, prebuild will run before build, and postbuild will run after build.
+The prefix tells Node what order to run these scripts in.
+
+I'm using npm-run-all, which is a cross-platform way to run multiple commands either one at a time or in parallel.
+Here I'm not passing the parallel flag, so the clean-dist script will run, then test, then lint, then build.html.
+We want to make sure that all our tests pass and that our code lints successfully, and then we're calling the buildHtml step.
+
+    "prebuild": "npm-run-all clean-dist test lint build:html",
+
+Babel-node will transpile that down to ES5 so that Node will be able to parse it even if you're not running the latest version of Node.
+
+    "build": "babel-node tools/build.js",
+
+Finally, postbuild will run after build, which will open up our distServer so that we can see the results of our work.
+
+    "postbuild": "babel-node tools/distServer.js"
+___________________________________________________________________________________________
+
+
+  },
